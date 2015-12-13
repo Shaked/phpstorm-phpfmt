@@ -1,0 +1,5 @@
+phpfmt-phpplugin.zip
+out/
+.idea/
+*.iml
+phpfmt-phplugin.jar

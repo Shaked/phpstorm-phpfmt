@@ -1,0 +1,37 @@
+<idea-plugin version="2">
+    <id>com.phpfmt.fmt.SaveAllAction.id</id>
+    <name>phpstorm-phpfmt</name>
+    <version>1.0.0</version>
+    <vendor email="klein.shaked@gmail.com" url="http://www.github.com/phpfmt/phpstorm-phpfmt">phpstorm-phpfmt</vendor>
+
+    <description><![CDATA[
+      Plugin to format PHP code
+    ]]></description>
+
+    <change-notes><![CDATA[
+        First release supports minor formatting options.
+        Please see preferences for more information.
+    ]]>
+    </change-notes>
+
+    <idea-version since-build="141.0"/>
+    <depends>com.jetbrains.php</depends>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.phpfmt.fmt.Settings"/>
+        <applicationConfigurable instance="com.phpfmt.fmt.Configuration"/>
+    </extensions>
+
+    <application-components>
+        <component>
+            <implementation-class>com.phpfmt.fmt.Component</implementation-class>
+        </component>
+    </application-components>
+
+    <actions>
+        <action text="phpfmt" overrides="true" id="SaveAll" class="com.phpfmt.fmt.SaveAllAction"
+                icon="AllIcons.Actions.Menu_saveall"/>
+    </actions>
+
+</idea-plugin>
