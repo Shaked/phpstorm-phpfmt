@@ -20,6 +20,8 @@ import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -124,7 +126,7 @@ public class Formatter {
         //!isPsiFileExcluded(project, psiFile); //, settings.getExclusions()
     }
 
-    private String fmt(String text, Settings settings) throws IllegalArgumentException,InterruptedException {
+    private String fmt(String text, Settings settings) throws IllegalArgumentException, InterruptedException {
 
         List<String> list = new ArrayList<>();
         list.add(settings.getPhpExecutable());
@@ -188,6 +190,17 @@ public class Formatter {
 
         OutputStream stdin = process.getOutputStream(); // <- Eh?
         InputStream stdout = process.getInputStream();
+        InputStream stderr = process.getErrorStream();
+
+
+        ByteArrayOutputStream errous = new ByteArrayOutputStream();
+        StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous);
+        ByteArrayOutputStream ous = new ByteArrayOutputStream();
+        // any output?
+        StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous);
+
+        errorGobbler.start();
+        outputGobbler.start();
 
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
 
@@ -198,14 +211,20 @@ public class Formatter {
         } catch (IOException e) {
             throw new InterruptedException("error close process: " + e.getMessage() + ": text: " + text + ": list: " + list.toString() + ": settings: " + settings.toString());
         }
-        process.waitFor();
+        int exitStatus = process.waitFor();
+//
+
+//       String fmtCode = Util.streamToString(stdout);
+//       String err = Util.streamToString(stderr);
+
+        String fmtCode = ous.toString();
 
 
-        Scanner scanner = new Scanner(stdout);
-        String fmtCode = "";
-        while (scanner.hasNextLine()) {
-            String line = String.format("%s\n", scanner.nextLine());
-            fmtCode += line;
+        LOGGER.debug("fmtCode: " + fmtCode);
+        if (0 != exitStatus) {
+            String err = errous.toString();
+            LOGGER.debug("stdErr: " + err);
+            throw new InterruptedException(err);
         }
         return fmtCode;
 
@@ -217,4 +236,44 @@ public class Formatter {
         }
     }
 
+    class StreamGobbler extends Thread {
+        InputStream is;
+        String type;
+        OutputStream os;
+
+        StreamGobbler(InputStream is, String type) {
+            this(is, type, null);
+        }
+
+        StreamGobbler(InputStream is, String type, OutputStream redirect) {
+            this.is = is;
+            this.type = type;
+            this.os = redirect;
+        }
+
+        public void run() {
+            try {
+                PrintWriter pw = null;
+                if (os != null)
+                    pw = new PrintWriter(os);
+
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    if (pw != null)
+                        pw.println(line);
+                    System.out.println(type + ">" + line);
+                }
+                if (pw != null)
+                    pw.flush();
+            } catch (IOException ioe) {
+                LOGGER.debug("StreamGobbler: " + this.type);
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                ioe.printStackTrace(pw);
+                LOGGER.debug("stack trace: " + sw.toString());
+            }
+        }
+    }
 }

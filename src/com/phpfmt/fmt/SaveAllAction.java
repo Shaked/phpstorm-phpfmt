@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class SaveAllAction extends AnAction implements DumbAware {
     final public static String id = "phpfmt";
-    private volatile boolean isActionPerformed = false;
+    public volatile boolean isActionPerformed = false;
 
     public static final Logger LOGGER = Logger.getInstance(SaveAllAction.class);
     static {
@@ -20,15 +20,8 @@ public class SaveAllAction extends AnAction implements DumbAware {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         try {
-            this.isActionPerformed = true;
-            LOGGER.debug("Saving....!");
             ApplicationManager.getApplication().saveAll();
         } finally {
-            this.isActionPerformed = false;
         }
-    }
-
-    public boolean isActionPerformed(){
-        return this.isActionPerformed;
     }
 }

@@ -24,9 +24,10 @@ public class FileListener extends FileDocumentManagerAdapter {
 
     @Override
     public void beforeDocumentSaving(@NotNull Document document) {
-        SaveAllAction phpfmt = (SaveAllAction) ActionManager.getInstance().getAction("SaveAll");
-        if (!settings.isActivate() || phpfmt == null || !phpfmt.isActionPerformed() && isDocumentActive(document)) {
-            System.out.println("Document " + document + " is still active, do not execute");
+        SaveAllAction.LOGGER.debug("isActivate: " + settings.isActivate());
+        SaveAllAction.LOGGER.debug("isActionPerformed: " + " :: isDocumentActive: " + isDocumentActive(document));
+        if (!settings.isActivate()) {
+            SaveAllAction.LOGGER.debug("Document " + document + " is still active, do not execute");
             return;
         }
 
