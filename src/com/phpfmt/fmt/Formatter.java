@@ -5,27 +5,17 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.DocumentRunnable;
-import com.intellij.openapi.editor.richcopy.model.OutputInfoSerializer;
-import com.intellij.openapi.fileTypes.CharsetUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.javafx.tools.doclets.internal.toolkit.util.DocFinder;
 import org.apache.log4j.Level;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 import static com.phpfmt.fmt.PsiFiles.isPsiFilePhysicallyInProject;
 
@@ -33,7 +23,7 @@ import static com.phpfmt.fmt.PsiFiles.isPsiFilePhysicallyInProject;
  * Created by Shaked on 12/13/15.
  */
 public class Formatter {
-    public static final Logger LOGGER = Logger.getInstance(SaveAllAction.class);
+    public static final Logger LOGGER = Logger.getInstance(FormatterAction.class);
 
     static {
         LOGGER.setLevel(Level.DEBUG);

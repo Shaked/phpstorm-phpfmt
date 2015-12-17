@@ -7,9 +7,6 @@ import com.intellij.openapi.components.StoragePathMacros;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Shaked on 12/13/15.
  */
@@ -30,6 +27,25 @@ public class Settings implements PersistentStateComponent<Settings> {
 
     private String pharPath = "";
     private String version = "";
+    private String extensions = ".php";
+
+    public boolean isFormatOnSave() {
+        return formatOnSave;
+    }
+
+    public void setFormatOnSave(boolean formatOnSave) {
+        this.formatOnSave = formatOnSave;
+    }
+
+    private boolean formatOnSave = false;
+
+    public String getExtensions() {
+        return extensions;
+    }
+
+    public void setExtensions(String extensions) {
+        this.extensions = extensions;
+    }
 
     private String optionsFile = "";
 

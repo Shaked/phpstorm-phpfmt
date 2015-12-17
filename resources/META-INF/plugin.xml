@@ -1,7 +1,7 @@
 <idea-plugin version="2">
-    <id>com.phpfmt.fmt.SaveAllAction.id</id>
+    <id>phpfmt</id>
     <name>PhpStorm phpfmt</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <vendor email="klein.shaked@gmail.com" url="http://www.github.com/phpfmt/phpstorm-phpfmt">phpstorm-phpfmt</vendor>
 
     <description><![CDATA[
@@ -30,8 +30,16 @@
     </application-components>
 
     <actions>
-        <action text="phpfmt" overrides="true" id="SaveAll" class="com.phpfmt.fmt.SaveAllAction"
-                icon="AllIcons.Actions.Menu_saveall"/>
+        <!--<action text="phpfmt" overrides="true" id="SaveAll" class="com.phpfmt.fmt.FormatterAction"-->
+                <!--icon="AllIcons.Actions.Menu_saveall"/>-->
+        <action id="format_code" class="com.phpfmt.fmt.FormatterAction"
+                text="Format Code"
+                description="Formats the code using the phpfmt library">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt ctrl f"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="alt ctrl f"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="alt ctrl f"/>
+            <add-to-group group-id="CodeMenu" anchor="first"/>
+        </action>
     </actions>
 
 </idea-plugin>
