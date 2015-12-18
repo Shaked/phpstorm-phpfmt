@@ -5,6 +5,7 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.DocumentRunnable;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.TextRange;
@@ -13,6 +14,7 @@ import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +31,20 @@ public class Formatter {
         LOGGER.setLevel(Level.DEBUG);
     }
 
+    private boolean isValidExtension(FileType fileType, ArrayList<String> extensions) {
+        String fileTypeName = fileType.getName().toLowerCase();
+        return extensions.contains(fileTypeName);
+    }
+
     public void Format(final Document document, Settings settings) {
         for (final Project project : ProjectManager.getInstance().getOpenProjects()) {
             final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-            LOGGER.debug("psiFile: " + psiFile.getText());
+            LOGGER.debug("psiFile: " + psiFile.getText() + "filetype: " + psiFile.getFileType() + " name: " + psiFile.getOriginalFile().getName());
+            if (!this.isValidExtension(psiFile.getFileType(), settings.getExtensions())) {
+                LOGGER.debug("isValidExtension failed: " + psiFile.getFileType().getName().toLowerCase() + ": " + settings.getExtensions().toString());
+                return;
+            }
+
             if (isPsiFileEligible(project, psiFile)) {
                 try {
                     final String formatted = fmt(document.getCharsSequence().toString(), settings);

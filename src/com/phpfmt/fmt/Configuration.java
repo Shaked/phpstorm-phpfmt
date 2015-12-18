@@ -3,6 +3,7 @@ package com.phpfmt.fmt;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,7 +64,7 @@ public class Configuration implements Configurable {
         modified = modified || settings.isPsr1Naming() != psr1NamingCheckBox.isSelected();
         modified = modified || settings.isPsr2() != psr2CheckBox.isSelected();
         modified = modified || settings.isYoda() != yodaCheckBox.isSelected();
-        modified = modified || settings.getExtensions() != extensions.getText();
+        modified = modified || !settings.getExtensions().contains(extensions.getText());
         modified = modified || settings.isFormatOnSave() != formatOnSave.isSelected();
         return modified;
     }
@@ -95,7 +96,7 @@ public class Configuration implements Configurable {
         psr1CheckBox.setSelected(settings.isPsr1());
         psr1NamingCheckBox.setSelected(settings.isPsr1Naming());
         yodaCheckBox.setSelected(settings.isYoda());
-        extensions.setText(settings.getExtensions());
+        extensions.setText(StringUtil.join(settings.getExtensions(), ","));
         formatOnSave.setSelected(settings.isFormatOnSave());
     }
 
