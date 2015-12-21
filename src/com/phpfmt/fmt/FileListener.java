@@ -16,8 +16,8 @@ public class FileListener extends FileDocumentManagerAdapter {
     public void beforeDocumentSaving(@NotNull Document document) {
         FormatterAction.LOGGER.debug("isActivate: " + settings.isActivate());
         FormatterAction.LOGGER.debug("isActionPerformed: " + " :: isDocumentActive: " + isDocumentActive(document));
-        if (!settings.isActivate()) {
-            FormatterAction.LOGGER.debug("Document " + document + " is still active, do not execute");
+        if (!settings.isActivate() || !settings.isFormatOnSave()) {
+            FormatterAction.LOGGER.debug("isActivate: " + settings.isActivate() + "isFormatOnSave" + settings.isFormatOnSave());
             return;
         }
 
