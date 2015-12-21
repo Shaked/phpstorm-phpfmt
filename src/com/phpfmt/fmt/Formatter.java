@@ -14,7 +14,6 @@ import com.intellij.psi.PsiFile;
 import org.apache.log4j.Level;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -156,13 +155,13 @@ public class Formatter {
             list.add("--psr2");
         }
 
-        if (settings.isIndentWithSpace()) {
+        if (settings.getSpaceIndentationSize() > 0) {
             list.add("--indent_with_space");
-        } else if (settings.getIndentWithSpace() > 0) {
-            list.add("--indent_with_space=" + settings.getIndentWithSpace());
+        } else if  (settings.isSpaceIndentation()) {
+            list.add("--indent_with_space=" + settings.getSpaceIndentationSize());
         }
 
-        if (settings.isEnableAutoAlign()) {
+        if (settings.isAutoAlign()) {
             list.add("--enable_auto_align");
         }
 
@@ -176,6 +175,27 @@ public class Formatter {
 
         if (settings.isYoda()) {
             list.add("--yoda");
+        }
+
+        if ("" != settings.getSettersGettersType()) {
+            list.add("--setters_and_getters=" + settings.getSettersGettersType());
+            list.add("--constructor=" + settings.getSettersGettersType());
+        }
+
+        if (settings.isAutoImport() && "" != settings.getOracleFileName()) {
+            list.add("--oracleDB=" + settings.getOracleFileName());
+        }
+
+        if ("" != settings.getPasses()) {
+            list.add("--passes=" + settings.getPasses());
+        }
+
+        if ("" != settings.getExclude()) {
+            list.add("--exclude=" + settings.getExclude());
+        }
+
+        if (settings.isDebug()) {
+            list.add("-v");
         }
 
         list.add("-o=-");

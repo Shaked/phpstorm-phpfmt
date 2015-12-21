@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Shaked on 12/13/15.
@@ -60,13 +59,23 @@ public class Settings implements PersistentStateComponent<Settings> {
     private boolean psr1 = false;
     private boolean psr1Naming = false;
     private boolean psr2 = false;
-    private int indentWithSpace = 0;
+    private boolean indentWithSpace = false;
+    private int indentWithSpaceSize = 0;
     private boolean enableAutoAlign = false;
     private boolean visibilityOrder = false;
     private boolean smartLinebreakAfterCurly = false;
     private boolean yoda = false;
-    private boolean sgter = false;
+    private String settersGettersType = "";
     private boolean autoImport = false;
+    private String oracleFileName = "";
+
+    public String getOracleFileName() {
+        return oracleFileName;
+    }
+
+    public void setOracleFileName(String oracleFileName) {
+        this.oracleFileName = oracleFileName;
+    }
 
     public boolean isInstalled(String version) {
         return pharPath != "" && this.version == version;
@@ -127,15 +136,18 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.psr2 = psr2;
     }
 
-    public boolean isIndentWithSpace() {
-        return (indentWithSpace == -1);
-    }
-    public int getIndentWithSpace() {
+    public boolean isSpaceIndentation() {
         return indentWithSpace;
     }
-
-    public void setIndentWithSpace(int indentWithSpace) {
+    public void setSpaceIndentation(boolean indentWithSpace) {
         this.indentWithSpace = indentWithSpace;
+    }
+
+    public void setSpaceIndentationSize(int indentWithSpace) {
+        this.indentWithSpaceSize = indentWithSpace;
+    }
+    public int getSpaceIndentationSize(){
+        return this.indentWithSpaceSize;
     }
 
     public String getPasses() {
@@ -162,11 +174,11 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.activated = activated;
     }
 
-    public boolean isEnableAutoAlign() {
+    public boolean isAutoAlign() {
         return enableAutoAlign;
     }
 
-    public void setEnableAutoAlign(boolean enableAutoAlign) {
+    public void setAutoAlign(boolean enableAutoAlign) {
         this.enableAutoAlign = enableAutoAlign;
     }
 
@@ -194,12 +206,12 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.yoda = yoda;
     }
 
-    public boolean isSgter() {
-        return sgter;
+    public String getSettersGettersType() {
+        return settersGettersType;
     }
 
-    public void setSgter(boolean sgter) {
-        this.sgter = sgter;
+    public void setSettersGettersType(String settersGettersType) {
+        this.settersGettersType = settersGettersType;
     }
 
     public boolean isAutoImport() {
