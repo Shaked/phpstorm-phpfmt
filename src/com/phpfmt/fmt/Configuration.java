@@ -39,6 +39,7 @@ public class Configuration implements Configurable {
     private JTextField oracleFileName;
     private JComboBox settersAndGetters;
     private JCheckBox smartLinebreakAfterCurlyCheckBox;
+    private JTextArea ignoreFilesExtensions;
 
 
     @Nls
@@ -82,6 +83,7 @@ public class Configuration implements Configurable {
         modified = modified || settings.getSettersGettersType() != settersAndGetters.getSelectedItem().toString();
         modified = modified || settings.getOracleFileName() != oracleFileName.getText();
         modified = modified || settings.isAutoImport() != autoImportCheckBox.isSelected();
+        modified = modified || settings.getIgnoreFilesExtensions() != ignoreFilesExtensions.getText();
         return modified;
     }
 
@@ -114,6 +116,8 @@ public class Configuration implements Configurable {
         if (autoImportCheckBox.isSelected() && "" != oracleFileName.getText()) {
             settings.setOracleFileName(oracleFileName.getText());
         }
+
+        settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
     }
 
     @Override
@@ -136,6 +140,7 @@ public class Configuration implements Configurable {
         smartLinebreakAfterCurlyCheckBox.setSelected(settings.isSmartLinebreakAfterCurly());
         settersAndGetters.setSelectedItem(settings.getSettersGettersType());
         oracleFileName.setText(settings.getOracleFileName());
+        ignoreFilesExtensions.setText(settings.getIgnoreFilesExtensions());
     }
 
     @Override
@@ -159,6 +164,7 @@ public class Configuration implements Configurable {
         settersAndGetters = null;
         oracleFileName = null;
         autoImportCheckBox = null;
+        ignoreFilesExtensions = null;
     }
 
 

@@ -35,12 +35,29 @@ public class Formatter {
         return extensions.contains(fileTypeName);
     }
 
+    private boolean blockedFileOrExtension(String fileName, String ignoreFileExtensions) {
+        String[] p = ignoreFileExtensions.split(",");
+        for (String item : p) {
+            if (fileName.contains(item)) {
+                LOGGER.debug("blockedFileOrExtension::returns true::" + item);
+                return true;
+            }
+        }
+        LOGGER.debug("blockedFileOrExtension::returns false");
+        return false;
+    }
+
     public void Format(final Document document, Settings settings) {
         for (final Project project : ProjectManager.getInstance().getOpenProjects()) {
             final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
             LOGGER.debug("psiFile: " + psiFile.getText() + "filetype: " + psiFile.getFileType() + " name: " + psiFile.getOriginalFile().getName());
             if (!this.isValidExtension(psiFile.getFileType(), settings.getExtensions())) {
                 LOGGER.debug("isValidExtension failed: " + psiFile.getFileType().getName().toLowerCase() + ": " + settings.getExtensions().toString());
+                return;
+            }
+
+            if (this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
+                LOGGER.debug("blockedFileOrExtension passed: " + psiFile.getName().toLowerCase() + ": " + settings.getIgnoreFilesExtensions().toString());
                 return;
             }
 
@@ -157,7 +174,7 @@ public class Formatter {
 
         if (settings.getSpaceIndentationSize() > 0) {
             list.add("--indent_with_space");
-        } else if  (settings.isSpaceIndentation()) {
+        } else if (settings.isSpaceIndentation()) {
             list.add("--indent_with_space=" + settings.getSpaceIndentationSize());
         }
 
