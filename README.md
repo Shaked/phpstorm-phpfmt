@@ -3,4 +3,4 @@
 ### Installation
 
 [Plugin](https://plugins.jetbrains.com/plugin/8110?pr=) is available via PhpStorm package manager. 
-![](http://plugins.jetbrains.com/files/8110/screenshot_15560.png)
+![](http://plugins.jetbrains.com/files/8110/screenshot_15561.png)
