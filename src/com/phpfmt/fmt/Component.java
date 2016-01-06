@@ -10,10 +10,9 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Component implements ApplicationComponent {
 
@@ -22,9 +21,58 @@ public class Component implements ApplicationComponent {
 
     public void initComponent() {
         install();
+        FormatterAction.LOGGER.debug("settings.isAutoUpdatePhar? " + settings.isAutoUpdatePhar());
+        if (settings.isAutoUpdatePhar()) {
+            updatePhar();
+        }
         final MessageBus bus = ApplicationManager.getApplication().getMessageBus();
         final MessageBusConnection connection = bus.connect();
         connection.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileListener());
+    }
+
+    private void updatePhar() {
+        List<String> list = new ArrayList<>();
+        list.add(settings.getPhpExecutable());
+        if (!settings.isDebug()) {
+            list.add("-ddisplay_errors=stderr");
+        }
+        list.add(settings.getPharPath());
+        list.add("--selfupdate");
+        FormatterAction.LOGGER.debug("LIST: " + list.toString());
+        ProcessBuilder pb = new ProcessBuilder(list);
+        Process process;
+        try {
+            process = pb.start();
+            InputStream stdout = process.getInputStream();
+            InputStream stderr = process.getErrorStream();
+
+
+            ByteArrayOutputStream errous = new ByteArrayOutputStream();
+            StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous);
+            ByteArrayOutputStream ous = new ByteArrayOutputStream();
+            // any output?
+            StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous);
+
+            errorGobbler.start();
+            outputGobbler.start();
+
+            int exitStatus = -1;
+            try {
+                exitStatus = process.waitFor();
+            } catch (InterruptedException e) {
+                FormatterAction.LOGGER.debug("waiting for process failed: " + e.getMessage());
+            }
+            String retOutput = ous.toString();
+
+
+            FormatterAction.LOGGER.debug("retOutput: " + retOutput);
+            if (0 != exitStatus) {
+                String err = errous.toString();
+                FormatterAction.LOGGER.debug("stdErr: " + err);
+            }
+        } catch (IOException e) {
+            FormatterAction.LOGGER.debug("error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
+        }
     }
 
     private void install() {

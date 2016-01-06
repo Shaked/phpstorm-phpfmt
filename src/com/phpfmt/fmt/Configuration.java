@@ -40,6 +40,7 @@ public class Configuration implements Configurable {
     private JComboBox settersAndGetters;
     private JCheckBox smartLinebreakAfterCurlyCheckBox;
     private JTextArea ignoreFilesExtensions;
+    private JCheckBox autoUpdatePharCheckbox;
 
 
     @Nls
@@ -84,6 +85,7 @@ public class Configuration implements Configurable {
         modified = modified || settings.getOracleFileName() != oracleFileName.getText();
         modified = modified || settings.isAutoImport() != autoImportCheckBox.isSelected();
         modified = modified || settings.getIgnoreFilesExtensions() != ignoreFilesExtensions.getText();
+        modified = modified || settings.isAutoUpdatePhar() != autoUpdatePharCheckbox.isSelected();
         return modified;
     }
 
@@ -118,6 +120,7 @@ public class Configuration implements Configurable {
         }
 
         settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
+        settings.setAutoUpdatePhar(autoUpdatePharCheckbox.isSelected());
     }
 
     @Override
@@ -141,6 +144,7 @@ public class Configuration implements Configurable {
         settersAndGetters.setSelectedItem(settings.getSettersGettersType());
         oracleFileName.setText(settings.getOracleFileName());
         ignoreFilesExtensions.setText(settings.getIgnoreFilesExtensions());
+        autoUpdatePharCheckbox.setSelected(settings.isAutoUpdatePhar());
     }
 
     @Override
@@ -165,6 +169,7 @@ public class Configuration implements Configurable {
         oracleFileName = null;
         autoImportCheckBox = null;
         ignoreFilesExtensions = null;
+        autoUpdatePharCheckbox = null;
     }
 
 

@@ -69,9 +69,18 @@ public class Settings implements PersistentStateComponent<Settings> {
     private boolean autoImport = false;
     private String oracleFileName = "";
     private String ignoreFilesExtensions = "";
+    private boolean autoUpdatePhar = false;
 
     public String getIgnoreFilesExtensions() {
         return ignoreFilesExtensions;
+    }
+
+    public boolean isAutoUpdatePhar() {
+        return autoUpdatePhar;
+    }
+
+    public void setAutoUpdatePhar(boolean autoUpdatePhar) {
+        this.autoUpdatePhar = autoUpdatePhar;
     }
 
     public void setIgnoreFilesExtensions(String ignoreFilesExtensions) {
