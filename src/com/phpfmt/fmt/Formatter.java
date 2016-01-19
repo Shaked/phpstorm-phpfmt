@@ -47,24 +47,24 @@ public class Formatter {
         return false;
     }
 
-    public void Format(final Document document, Settings settings) {
+    public void Format(final Document document, final Settings settings) {
         for (final Project project : ProjectManager.getInstance().getOpenProjects()) {
             final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-            LOGGER.debug("psiFile: " + psiFile.getText() + "filetype: " + psiFile.getFileType() + " name: " + psiFile.getOriginalFile().getName());
+            Component.toEventLog(settings.isDebug(), "Format", "psiFile: " + psiFile.getText() + "filetype: " + psiFile.getFileType() + " name: " + psiFile.getOriginalFile().getName());
             if (!this.isValidExtension(psiFile.getFileType(), settings.getExtensions())) {
-                LOGGER.debug("isValidExtension failed: " + psiFile.getFileType().getName().toLowerCase() + ": " + settings.getExtensions().toString());
+                Component.toEventLog(settings.isDebug(), "Format", "isValidExtension failed: " + psiFile.getFileType().getName().toLowerCase() + ": " + settings.getExtensions().toString());
                 return;
             }
 
             if (this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
-                LOGGER.debug("blockedFileOrExtension passed: " + psiFile.getName().toLowerCase() + ": " + settings.getIgnoreFilesExtensions().toString());
+                Component.toEventLog(settings.isDebug(), "Format", "blockedFileOrExtension passed: " + psiFile.getName().toLowerCase() + ": " + settings.getIgnoreFilesExtensions().toString());
                 return;
             }
 
             if (isPsiFileEligible(project, psiFile)) {
                 try {
                     final String formatted = fmt(document.getCharsSequence().toString(), settings);
-                    LOGGER.debug("formatted: " + formatted);
+                    Component.toEventLog(settings.isDebug(), "Format", "formatted: " + formatted);
                     ApplicationManager.getApplication().runWriteAction(new DocumentRunnable(document, null) {
                         @Override
                         public void run() {
@@ -74,17 +74,17 @@ public class Formatter {
                                     String original = document.getText();
                                     String err = "";
                                     try {
-                                        LOGGER.debug("_merge: " + err);
+                                        Component.toEventLog(settings.isDebug(), "Format", "_merge: " + err);
                                         this._merge(document, document.getTextLength(), formatted);
                                     } catch (MergeException e) {
                                         err = String.format("Could not merge changes into the buffer, edit aborted: %s", e.getMessage());
-                                        LOGGER.debug("_merge: " + err);
+                                        Component.toEventLog(settings.isDebug(), "Format", "_merge: " + err);
                                         document.replaceString(0, original.length(), original);
                                     } catch (Exception e) {
                                         err = "error: " + e.getMessage();
                                     } finally {
                                         System.out.println(err);
-                                        LOGGER.debug("err: " + err);
+                                        Component.toEventLog(settings.isDebug(), "Format", "err: " + err);
                                     }
                                 }
 
@@ -131,9 +131,9 @@ public class Formatter {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
-                    LOGGER.debug("stack trace: " + sw.toString());
+                    Component.toEventLog(settings.isDebug(), "Format", "stack trace: " + sw.toString());
                     System.out.println("fmt error: " + e.getMessage());
-                    LOGGER.debug("fmt error: " + e.getMessage());
+                    Component.toEventLog(settings.isDebug(), "Format", "fmt error: " + e.getMessage());
                 }
             }
         }
@@ -218,7 +218,7 @@ public class Formatter {
         list.add("-o=-");
         list.add("-");
         System.out.println(list);
-        LOGGER.debug("LIST: " + list.toString());
+        Component.toEventLog(settings.isDebug(), "Format", "LIST: " + list.toString());
         ProcessBuilder pb = new ProcessBuilder(list);
         Process process;
         try {
@@ -259,7 +259,7 @@ public class Formatter {
         String fmtCode = ous.toString();
 
 
-        LOGGER.debug("fmtCode: " + fmtCode);
+        Component.toEventLog(settings.isDebug(), "Format", "fmtCode: " + fmtCode);
         if (0 != exitStatus) {
             String err = errous.toString();
             LOGGER.debug("stdErr: " + err);

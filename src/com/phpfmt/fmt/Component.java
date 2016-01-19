@@ -2,15 +2,20 @@ package com.phpfmt.fmt;
 
 import com.intellij.AppTopics;
 import com.intellij.ide.plugins.PluginManager;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +26,7 @@ public class Component implements ApplicationComponent {
 
     public void initComponent() {
         install();
-        FormatterAction.LOGGER.debug("settings.isAutoUpdatePhar? " + settings.isAutoUpdatePhar());
+        toEventLog(settings.isDebug(), "initComponent", "settings.isAutoUpdatePhar? " + settings.isAutoUpdatePhar());
         if (settings.isAutoUpdatePhar()) {
             updatePhar();
         }
@@ -38,7 +43,7 @@ public class Component implements ApplicationComponent {
         }
         list.add(settings.getPharPath());
         list.add("--selfupdate");
-        FormatterAction.LOGGER.debug("LIST: " + list.toString());
+        toEventLog(settings.isDebug(), "updatePhar", "LIST: " + list.toString());
         ProcessBuilder pb = new ProcessBuilder(list);
         Process process;
         try {
@@ -60,26 +65,45 @@ public class Component implements ApplicationComponent {
             try {
                 exitStatus = process.waitFor();
             } catch (InterruptedException e) {
-                FormatterAction.LOGGER.debug("waiting for process failed: " + e.getMessage());
+                toEventLog(settings.isDebug(), "updatePhar", "waiting for process failed: " + e.getMessage());
             }
             String retOutput = ous.toString();
 
 
-            FormatterAction.LOGGER.debug("retOutput: " + retOutput);
+            toEventLog(settings.isDebug(), "updatePhar", "retOutput: " + retOutput);
             if (0 != exitStatus) {
                 String err = errous.toString();
-                FormatterAction.LOGGER.debug("stdErr: " + err);
+                toEventLog(settings.isDebug(), "updatePhar", "stdErr: " + err);
             }
         } catch (IOException e) {
-            FormatterAction.LOGGER.debug("error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
+            toEventLog(settings.isDebug(), "updatePhar", "error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
+        }
+    }
+
+    private String path() {
+        URL url1 = Component.class.getResource("/bin/fmt.phar");
+        String ur = url1.toString();
+        ur = ur.substring(9);
+        String truepath[] = ur.split("phpstorm-phpfmt.jar!");
+        truepath[0] = truepath[0].replaceAll("%20", " ");
+        String x = truepath[0];
+        toEventLog(settings.isDebug(), "path    ", "Path is: " + x + " UR is: " + ur);
+        return x;
+    }
+
+    public static void toEventLog(boolean isDebug, String title, String msg) {
+        FormatterAction.LOGGER.debug(title + ": " + msg);
+        if (isDebug) {
+            Notifications.Bus.notify(new Notification("phpfmt", title, msg, NotificationType.INFORMATION));
         }
     }
 
     private void install() {
         String version = PluginManager.getPlugin(PluginId.getId("phpfmt")).getVersion();
-        FormatterAction.LOGGER.debug(this.getClass().toString() + ": version: " + version + ": isInstalled:" + settings.isInstalled(version) + " getPath: " + settings.getPharPath());
+        toEventLog(settings.isDebug(), "install", this.getClass().toString() + ": version: " + version + ": isInstalled:" + settings.isInstalled(version) + " getPath: " + settings.getPharPath());
         if (!settings.isInstalled(version)) {
-            File phar = new File("fmt.phar");
+            String pharFile = path() + "/fmt.phar";
+            File phar = new File(pharFile);
             if (phar != null) {
                 phar.delete();
             }
@@ -87,7 +111,7 @@ public class Component implements ApplicationComponent {
                 InputStream ddlStream = Component.class.getClassLoader().getResourceAsStream("/bin/fmt.phar");
                 FileOutputStream fos = null;
                 try {
-                    fos = new FileOutputStream("fmt.phar");
+                    fos = new FileOutputStream(pharFile);
                     byte[] buf = new byte[2048];
                     int r = ddlStream.read(buf);
                     while (r != -1) {
@@ -100,13 +124,13 @@ public class Component implements ApplicationComponent {
                         fos.close();
                     }
                 }
-                String pharPath = new File("fmt.phar").getAbsolutePath();
+                String pharPath = new File(pharFile).getAbsolutePath();
 
-                FormatterAction.LOGGER.debug(this.getClass().toString() + ": pharPath:" + pharPath);
+                toEventLog(settings.isDebug(), "install", this.getClass().toString() + ": pharPath:" + pharPath);
                 settings.setPharPath(pharPath);
                 settings.setVersion(version);
             } catch (Exception e) {
-                FormatterAction.LOGGER.debug(this.getClass().toString() + ": exception export resource" + e.getMessage());
+                toEventLog(settings.isDebug(), "install-exception", this.getClass().toString() + ": exception export resource" + e.getMessage());
             }
         }
     }
