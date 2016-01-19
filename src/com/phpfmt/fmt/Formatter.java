@@ -37,8 +37,9 @@ public class Formatter {
 
     private boolean blockedFileOrExtension(String fileName, String ignoreFileExtensions) {
         String[] p = ignoreFileExtensions.split(",");
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
         for (String item : p) {
-            if (fileName.contains(item)) {
+            if (extension.equalsIgnoreCase(item)) {
                 LOGGER.debug("blockedFileOrExtension::returns true::" + item);
                 return true;
             }
@@ -56,7 +57,7 @@ public class Formatter {
                 return;
             }
 
-            if (this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
+            if ("" != settings.getIgnoreFilesExtensions() && this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
                 Component.toEventLog(settings.isDebug(), "Format", "blockedFileOrExtension passed: " + psiFile.getName().toLowerCase() + ": " + settings.getIgnoreFilesExtensions().toString());
                 return;
             }
@@ -99,7 +100,7 @@ public class Formatter {
                                     int i = 0;
                                     boolean dirty = false;
                                     for (diff_match_patch.Diff d : diffs) {
-                                        String s = d.text;
+                                        String s = d.text.replace("\r","");
                                         int l = s.length();
                                         if (d.operation == diff_match_patch.Operation.EQUAL) {
                                             l = s.length();
@@ -132,8 +133,8 @@ public class Formatter {
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
                     Component.toEventLog(settings.isDebug(), "Format", "stack trace: " + sw.toString());
-                    System.out.println("fmt error: " + e.getMessage());
                     Component.toEventLog(settings.isDebug(), "Format", "fmt error: " + e.getMessage());
+                    Component.notify("Formatter", "Could not format code");
                 }
             }
         }
@@ -203,11 +204,13 @@ public class Formatter {
             list.add("--oracleDB=" + settings.getOracleFileName());
         }
 
-        if ("" != settings.getPasses()) {
+        String isPasses = settings.getPasses();
+        if ("" != isPasses) {
             list.add("--passes=" + settings.getPasses());
         }
 
-        if ("" != settings.getExclude()) {
+        String isExclude = settings.getExclude();
+        if ("" != isExclude) {
             list.add("--exclude=" + settings.getExclude());
         }
 
@@ -217,8 +220,8 @@ public class Formatter {
 
         list.add("-o=-");
         list.add("-");
-        System.out.println(list);
         Component.toEventLog(settings.isDebug(), "Format", "LIST: " + list.toString());
+
         ProcessBuilder pb = new ProcessBuilder(list);
         Process process;
         try {
@@ -262,7 +265,7 @@ public class Formatter {
         Component.toEventLog(settings.isDebug(), "Format", "fmtCode: " + fmtCode);
         if (0 != exitStatus) {
             String err = errous.toString();
-            LOGGER.debug("stdErr: " + err);
+            Component.toEventLog(settings.isDebug(),"Formatter", "stdErr: " + err);
             throw new InterruptedException(err);
         }
         return fmtCode;

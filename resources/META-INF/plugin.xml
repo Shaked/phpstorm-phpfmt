@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>phpfmt</id>
     <name>PhpStorm phpfmt</name>
-    <version>1.0.6  </version>
+    <version>1.0.7</version>
     <vendor email="klein.shaked@gmail.com" url="http://www.github.com/phpfmt/phpstorm-phpfmt">phpstorm-phpfmt</vendor>
 
     <description><![CDATA[

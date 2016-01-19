@@ -76,7 +76,8 @@ public class Component implements ApplicationComponent {
                 toEventLog(settings.isDebug(), "updatePhar", "stdErr: " + err);
             }
         } catch (IOException e) {
-            toEventLog(settings.isDebug(), "updatePhar", "error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
+            notify("Update fmt.phar", "Could not automatically update fmt.phar. For more details, use `debug mode`");
+            toEventLog(settings.isDebug(), "Update fmt.phar", "error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
         }
     }
 
@@ -91,10 +92,14 @@ public class Component implements ApplicationComponent {
         return x;
     }
 
+    public static void notify(String title, String msg) {
+        Notifications.Bus.notify(new Notification("phpfmt", title, msg, NotificationType.INFORMATION));
+    }
+
     public static void toEventLog(boolean isDebug, String title, String msg) {
-        FormatterAction.LOGGER.debug(title + ": " + msg);
         if (isDebug) {
-            Notifications.Bus.notify(new Notification("phpfmt", title, msg, NotificationType.INFORMATION));
+            FormatterAction.LOGGER.debug(title + ": " + msg);
+            notify(title, msg);
         }
     }
 

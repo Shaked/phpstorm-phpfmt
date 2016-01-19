@@ -47,7 +47,7 @@ public class Settings implements PersistentStateComponent<Settings> {
     }
 
     public void setExtensions(String extensions) {
-        this.extensions = extensions.replace(".","");
+        this.extensions = extensions.replace(".", "");
     }
 
     private String optionsFile = "";
@@ -157,6 +157,7 @@ public class Settings implements PersistentStateComponent<Settings> {
     public boolean isSpaceIndentation() {
         return indentWithSpace;
     }
+
     public void setSpaceIndentation(boolean indentWithSpace) {
         this.indentWithSpace = indentWithSpace;
     }
@@ -164,12 +165,13 @@ public class Settings implements PersistentStateComponent<Settings> {
     public void setSpaceIndentationSize(int indentWithSpace) {
         this.indentWithSpaceSize = indentWithSpace;
     }
-    public int getSpaceIndentationSize(){
+
+    public int getSpaceIndentationSize() {
         return this.indentWithSpaceSize;
     }
 
     public String getPasses() {
-        return passes;
+        return passes.trim();
     }
 
     public void setPasses(String passes) {
@@ -177,7 +179,7 @@ public class Settings implements PersistentStateComponent<Settings> {
     }
 
     public String getExclude() {
-        return exclude;
+        return exclude.trim();
     }
 
     public void setExclude(String exclude) {
@@ -256,5 +258,18 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.phpExecutable = phpExecutable;
     }
 
-
+    public String toString() {
+        return "State" + this.getState() + "\n" +
+                "Extensions" + this.getExtensions() + "\n" +
+                "IgnoreFilesExtensions" + this.getIgnoreFilesExtensions() + "\n" +
+                "OracleFileName" + this.getOracleFileName() + "\n" +
+                "PharPath" + this.getPharPath() + "\n" +
+                "Version" + this.getVersion() + "\n" +
+                "SpaceIndentationSize" + this.getSpaceIndentationSize() + "\n" +
+                "Passes" + this.getPasses() + "\n" +
+                "Exclude" + this.getExclude() + "\n" +
+                "SettersGettersType" + this.getSettersGettersType() + "\n" +
+                "OptionsFile" + this.getOptionsFile() + "\n" +
+                "PhpExecutable" + this.getPhpExecutable() + "\n";
+    }
 }
