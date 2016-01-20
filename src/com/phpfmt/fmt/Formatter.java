@@ -57,7 +57,7 @@ public class Formatter {
                 return;
             }
 
-            if ("" != settings.getIgnoreFilesExtensions() && this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
+            if (!settings.getIgnoreFilesExtensions().isEmpty() && this.blockedFileOrExtension(psiFile.getName().toLowerCase(), settings.getIgnoreFilesExtensions())) {
                 Component.toEventLog(settings.isDebug(), "Format", "blockedFileOrExtension passed: " + psiFile.getName().toLowerCase() + ": " + settings.getIgnoreFilesExtensions().toString());
                 return;
             }
@@ -157,7 +157,7 @@ public class Formatter {
         }
         list.add(settings.getPharPath());
 
-        if ("" != settings.getOptionsFile()) {
+        if (!settings.getOptionsFile().isEmpty()) {
             list.add(String.format("--config=%s", settings.getOptionsFile()));
         }
 
@@ -195,22 +195,20 @@ public class Formatter {
             list.add("--yoda");
         }
 
-        if ("" != settings.getSettersGettersType()) {
+        if (!settings.getSettersGettersType().isEmpty()) {
             list.add("--setters_and_getters=" + settings.getSettersGettersType());
             list.add("--constructor=" + settings.getSettersGettersType());
         }
 
-        if (settings.isAutoImport() && "" != settings.getOracleFileName()) {
+        if (settings.isAutoImport() && !settings.getOracleFileName().isEmpty()) {
             list.add("--oracleDB=" + settings.getOracleFileName());
         }
 
-        String isPasses = settings.getPasses();
-        if ("" != isPasses) {
+        if (!settings.getPasses().isEmpty()) {
             list.add("--passes=" + settings.getPasses());
         }
 
-        String isExclude = settings.getExclude();
-        if ("" != isExclude) {
+        if (!settings.getExclude().isEmpty()) {
             list.add("--exclude=" + settings.getExclude());
         }
 

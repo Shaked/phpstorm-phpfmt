@@ -3,3 +3,4 @@ out/
 .idea/
 *.iml
 phpstorm-phpfmt.jar
+IGNORE-COMMENTS.md

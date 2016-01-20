@@ -2,9 +2,7 @@ package com.phpfmt.fmt;
 
 import com.intellij.AppTopics;
 import com.intellij.ide.plugins.PluginManager;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
+import com.intellij.notification.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.components.ServiceManager;
@@ -92,8 +90,11 @@ public class Component implements ApplicationComponent {
         return x;
     }
 
+    final static NotificationGroup ng = new NotificationGroup("phpfmt", NotificationDisplayType.TOOL_WINDOW, true);
     public static void notify(String title, String msg) {
-        Notifications.Bus.notify(new Notification("phpfmt", title, msg, NotificationType.INFORMATION));
+        Notification notification =  ng.createNotification("[" + title + "]" +msg, NotificationType.INFORMATION);
+        Notifications.Bus.notify(notification);
+        notification.hideBalloon();
     }
 
     public static void toEventLog(boolean isDebug, String title, String msg) {
