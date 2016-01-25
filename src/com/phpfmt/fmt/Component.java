@@ -90,7 +90,7 @@ public class Component implements ApplicationComponent {
         return x;
     }
 
-    final static NotificationGroup ng = new NotificationGroup("phpfmt", NotificationDisplayType.TOOL_WINDOW, true);
+    final static NotificationGroup ng = new NotificationGroup("phpfmt", NotificationDisplayType.NONE, true);
     public static void notify(String title, String msg) {
         Notification notification =  ng.createNotification("[" + title + "]" +msg, NotificationType.INFORMATION);
         Notifications.Bus.notify(notification);

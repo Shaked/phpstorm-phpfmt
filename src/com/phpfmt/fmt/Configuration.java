@@ -91,6 +91,9 @@ public class Configuration implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
+        passes.setText(passes.getText().replace("\"",""));
+        exclude.setText(exclude.getText().replace("\"",""));
+
         settings.setActivated(activate.isSelected());
         settings.setOptionsFile(optionsFile.getText());
         settings.setDebug(debugCheckBox.isSelected());
@@ -99,7 +102,7 @@ public class Configuration implements Configurable {
         settings.setExclude(exclude.getText());
         settings.setPsr1(psr1CheckBox.isSelected());
         settings.setPsr1Naming(psr1NamingCheckBox.isSelected());
-        settings.setPsr2(yodaCheckBox.isSelected());
+        settings.setPsr2(psr2CheckBox.isSelected());
         settings.setYoda(yodaCheckBox.isSelected());
         settings.setExtensions(extensions.getText());
         settings.setFormatOnSave(formatOnSave.isSelected());
@@ -133,6 +136,7 @@ public class Configuration implements Configurable {
         exclude.setText(settings.getExclude());
         psr1CheckBox.setSelected(settings.isPsr1());
         psr1NamingCheckBox.setSelected(settings.isPsr1Naming());
+        psr2CheckBox.setSelected(settings.isPsr2());
         yodaCheckBox.setSelected(settings.isYoda());
         extensions.setText(StringUtil.join(settings.getExtensions(), ","));
         formatOnSave.setSelected(settings.isFormatOnSave());
@@ -157,6 +161,7 @@ public class Configuration implements Configurable {
         exclude = null;
         psr1CheckBox = null;
         psr1NamingCheckBox = null;
+        psr2CheckBox = null;
         yodaCheckBox = null;
         extensions = null;
         formatOnSave = null;
