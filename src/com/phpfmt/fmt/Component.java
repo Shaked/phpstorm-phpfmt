@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,10 +52,10 @@ public class Component implements ApplicationComponent {
 
 
             ByteArrayOutputStream errous = new ByteArrayOutputStream();
-            StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous);
+            StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous, Charset.defaultCharset());
             ByteArrayOutputStream ous = new ByteArrayOutputStream();
             // any output?
-            StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous);
+            StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous, Charset.defaultCharset());
 
             errorGobbler.start();
             outputGobbler.start();

@@ -5,15 +5,23 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.DocumentRunnable;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.encoding.EncodingManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.io.IOUtil;
 import org.apache.log4j.Level;
+import org.apache.sanselan.util.IOUtils;
+import sun.security.pkcs.EncodingException;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +72,14 @@ public class Formatter {
 
             if (isPsiFileEligible(project, psiFile)) {
                 try {
-                    final String formatted = fmt(document.getCharsSequence().toString(), settings);
+
+                    Charset charset = EncodingManager.getInstance().getEncoding(FileDocumentManager.getInstance().getFile(document), true);
+                    if (charset == null) charset = EncodingManager.getInstance().getDefaultCharset();
+                    if (charset == null) charset = Charset.defaultCharset();
+                    Charset myCharset = charset;
+                    Component.toEventLog(settings.isDebug(), "Charset", "displayName: " + charset.displayName() + " name: " + charset.name());
+
+                    final String formatted = fmt(document.getText(), settings, myCharset);
                     Component.toEventLog(settings.isDebug(), "Format", "formatted: " + formatted);
                     ApplicationManager.getApplication().runWriteAction(new DocumentRunnable(document, null) {
                         @Override
@@ -100,7 +115,7 @@ public class Formatter {
                                     int i = 0;
                                     boolean dirty = false;
                                     for (diff_match_patch.Diff d : diffs) {
-                                        String s = d.text.replace("\r","");
+                                        String s = d.text.replace("\r", "");
                                         int l = s.length();
                                         if (d.operation == diff_match_patch.Operation.EQUAL) {
                                             l = s.length();
@@ -145,8 +160,8 @@ public class Formatter {
         //!isPsiFileExcluded(project, psiFile); //, settings.getExclusions()
     }
 
-    private String fmt(String text, Settings settings) throws IllegalArgumentException, InterruptedException {
-
+    private String fmt(String text, Settings settings, Charset myCharset) throws IllegalArgumentException, InterruptedException {
+        Component.toEventLog(settings.isDebug(), "fmt starts", "text: " + text);
         List<String> list = new ArrayList<>();
         list.add(settings.getPhpExecutable());
         if (!settings.isDebug()) {
@@ -234,36 +249,44 @@ public class Formatter {
 
 
         ByteArrayOutputStream errous = new ByteArrayOutputStream();
-        StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous);
+        StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous, myCharset, settings.isDebug());
         ByteArrayOutputStream ous = new ByteArrayOutputStream();
         // any output?
-        StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous);
+        StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous, myCharset, settings.isDebug());
 
         errorGobbler.start();
         outputGobbler.start();
 
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
+        BufferedOutputStream writer = new BufferedOutputStream(stdin);
 
         try {
-            writer.write(text);
+            byte[] buffer = new byte[1024];
+            InputStream is = new ByteArrayInputStream(text.getBytes(myCharset));
+
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                writer.write(buffer, 0, read);
+            }
+            String strFromBytes = new String(text.getBytes(myCharset), myCharset);
+            Component.toEventLog(settings.isDebug(), "BeforeWriting", "text: " + text + " :: strFromBytes: " + strFromBytes);
             writer.flush();
             writer.close();
         } catch (IOException e) {
             throw new InterruptedException("error close process: " + e.getMessage() + ": text: " + text + ": list: " + list.toString() + ": settings: " + settings.toString());
         }
         int exitStatus = process.waitFor();
-//
 
-//       String fmtCode = Util.streamToString(stdout);
-//       String err = Util.streamToString(stderr);
+        String fmtCode = text;
+        try {
+            fmtCode = ous.toString(myCharset.name());
+        } catch(UnsupportedEncodingException e) {
+            Component.toEventLog(settings.isDebug(), "Format", "unsupported encoding exception:  " + e.getMessage());
+        }
 
-        String fmtCode = ous.toString();
-
-
-        Component.toEventLog(settings.isDebug(), "Format", "fmtCode: " + fmtCode);
+        Component.toEventLog(settings.isDebug(), "Format", "fmtCode: " + fmtCode + " :: ous: " + ous);
         if (0 != exitStatus) {
             String err = errous.toString();
-            Component.toEventLog(settings.isDebug(),"Formatter", "stdErr: " + err);
+            Component.toEventLog(settings.isDebug(), "Formatter", "stdErr: " + err);
             throw new InterruptedException(err);
         }
         return fmtCode;
@@ -274,5 +297,12 @@ public class Formatter {
         public MergeException(String message) {
             super(message);
         }
+    }
+
+    static String readFile(String path, Charset encoding)
+            throws IOException
+    {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, encoding);
     }
 }
