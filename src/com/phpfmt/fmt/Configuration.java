@@ -65,11 +65,11 @@ public class Configuration implements Configurable {
     @Override
     public boolean isModified() {
         boolean modified = settings.isActivate() != activate.isSelected();
-        modified = modified || settings.getOptionsFile() != optionsFile.getText();
-        modified = modified || debugCheckBox.isSelected();
-        modified = modified || settings.getPhpExecutable() != phpExecutable.getText();
-        modified = modified || settings.getPasses() != passes.getText();
-        modified = modified || settings.getExclude() != exclude.getText();
+        modified = modified || settings.getOptionsFile().equals(optionsFile.getText());
+        modified = modified || debugCheckBox.isSelected() != settings.isDebug();
+        modified = modified || settings.getPhpExecutable().equals(phpExecutable.getText());
+        modified = modified || settings.getPasses().equals(passes.getText());
+        modified = modified || settings.getExclude().equals(exclude.getText());
         modified = modified || settings.isPsr1() != psr1CheckBox.isSelected();
         modified = modified || settings.isPsr1Naming() != psr1NamingCheckBox.isSelected();
         modified = modified || settings.isPsr2() != psr2CheckBox.isSelected();
@@ -77,22 +77,22 @@ public class Configuration implements Configurable {
         modified = modified || !settings.getExtensions().contains(extensions.getText());
         modified = modified || settings.isFormatOnSave() != formatOnSave.isSelected();
         modified = modified || settings.isSpaceIndentation() != spaceIndentationCheckBox.isSelected();
-        modified = modified || settings.getSpaceIndentationSize() != Integer.getInteger(spaceIndentationSize.getText());
+        modified = modified || settings.getSpaceIndentationSize() != Integer.parseInt(spaceIndentationSize.getText());
         modified = modified || settings.isAutoAlign() != autoAlignCheckBox.isSelected();
         modified = modified || settings.isVisibilityOrder() != visibilityOrderCheckBox.isSelected();
         modified = modified || settings.isSmartLinebreakAfterCurly() != smartLinebreakAfterCurlyCheckBox.isSelected();
-        modified = modified || settings.getSettersGettersType() != settersAndGetters.getSelectedItem().toString();
-        modified = modified || settings.getOracleFileName() != oracleFileName.getText();
+        modified = modified || settings.getSettersGettersType().equals(settersAndGetters.getSelectedItem().toString());
+        modified = modified || settings.getOracleFileName().equals(oracleFileName.getText());
         modified = modified || settings.isAutoImport() != autoImportCheckBox.isSelected();
-        modified = modified || settings.getIgnoreFilesExtensions() != ignoreFilesExtensions.getText();
+        modified = modified || settings.getIgnoreFilesExtensions().equals(ignoreFilesExtensions.getText());
         modified = modified || settings.isAutoUpdatePhar() != autoUpdatePharCheckbox.isSelected();
         return modified;
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        passes.setText(passes.getText().replace("\"",""));
-        exclude.setText(exclude.getText().replace("\"",""));
+        passes.setText(passes.getText().replace("\"", ""));
+        exclude.setText(exclude.getText().replace("\"", ""));
 
         settings.setActivated(activate.isSelected());
         settings.setOptionsFile(optionsFile.getText());
@@ -107,20 +107,23 @@ public class Configuration implements Configurable {
         settings.setExtensions(extensions.getText());
         settings.setFormatOnSave(formatOnSave.isSelected());
         settings.setSpaceIndentation(spaceIndentationCheckBox.isSelected());
-        if (spaceIndentationCheckBox.isSelected() && "" != spaceIndentationSize.getText()) {
-            settings.setSpaceIndentationSize(Integer.getInteger(spaceIndentationSize.getText()));
+        if (spaceIndentationCheckBox.isSelected() && !spaceIndentationSize.getText().isEmpty()) {
+            String spaceIndentationSizeText = spaceIndentationSize.getText();
+            int indentationSize = Integer.parseInt(spaceIndentationSizeText);
+            settings.setSpaceIndentationSize(indentationSize);
         }
         settings.setAutoAlign(autoAlignCheckBox.isSelected());
         settings.setVisibilityOrder(visibilityOrderCheckBox.isSelected());
         settings.setSmartLinebreakAfterCurly(smartLinebreakAfterCurlyCheckBox.isSelected());
         String settersGettersItemValue = settersAndGetters.getSelectedItem().toString();
-        if (Configuration.SETTERS_GETTERS_DEFAULT == settersGettersItemValue) {
+        if (Configuration.SETTERS_GETTERS_DEFAULT.equals(settersGettersItemValue)) {
             settersGettersItemValue = "";
         }
         settings.setSettersGettersType(settersGettersItemValue);
-        if (autoImportCheckBox.isSelected() && "" != oracleFileName.getText()) {
+        if (autoImportCheckBox.isSelected() && !oracleFileName.getText().isEmpty()) {
             settings.setOracleFileName(oracleFileName.getText());
         }
+        settings.setAutoImport(autoImportCheckBox.isSelected());
 
         settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
         settings.setAutoUpdatePhar(autoUpdatePharCheckbox.isSelected());
@@ -147,8 +150,12 @@ public class Configuration implements Configurable {
         smartLinebreakAfterCurlyCheckBox.setSelected(settings.isSmartLinebreakAfterCurly());
         settersAndGetters.setSelectedItem(settings.getSettersGettersType());
         oracleFileName.setText(settings.getOracleFileName());
+        autoImportCheckBox.setSelected(settings.isAutoImport());
         ignoreFilesExtensions.setText(settings.getIgnoreFilesExtensions());
         autoUpdatePharCheckbox.setSelected(settings.isAutoUpdatePhar());
+        spaceIndentationSize.setEnabled(spaceIndentationCheckBox.isSelected());
+        optionsFile.setEnabled(activate.isSelected());
+        oracleFileName.setEnabled(autoImportCheckBox.isSelected());
     }
 
     @Override
