@@ -40,7 +40,11 @@ public class Component implements ApplicationComponent {
         if (!settings.isDebug()) {
             list.add("-ddisplay_errors=stderr");
         }
-        list.add(settings.getPharPath());
+        String pharPath = settings.getPharPath();
+        if (!settings.getCustomPharPath().isEmpty()) {
+            pharPath = settings.getCustomPharPath();
+        }
+        list.add(pharPath);
         list.add("--selfupdate");
         toEventLog(settings.isDebug(), "updatePhar", "LIST: " + list.toString());
         ProcessBuilder pb = new ProcessBuilder(list);
@@ -92,8 +96,9 @@ public class Component implements ApplicationComponent {
     }
 
     final static NotificationGroup ng = new NotificationGroup("phpfmt", NotificationDisplayType.NONE, true);
+
     public static void notify(String title, String msg) {
-        Notification notification =  ng.createNotification("[" + title + "]" +msg, NotificationType.INFORMATION);
+        Notification notification = ng.createNotification("[" + title + "]" + msg, NotificationType.INFORMATION);
         Notifications.Bus.notify(notification);
         notification.hideBalloon();
     }

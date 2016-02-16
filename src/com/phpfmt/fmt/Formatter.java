@@ -170,7 +170,11 @@ public class Formatter {
         if (settings.isPsr1()) {
             list.add("-dshort_open_tag=On");
         }
-        list.add(settings.getPharPath());
+        String pharPath = settings.getPharPath();
+        if (!settings.getCustomPharPath().isEmpty()) {
+            pharPath = settings.getCustomPharPath();
+        }
+        list.add(pharPath);
 
         if (!settings.getOptionsFile().isEmpty()) {
             list.add(String.format("--config=%s", settings.getOptionsFile()));

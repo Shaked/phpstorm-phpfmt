@@ -41,6 +41,8 @@ public class Configuration implements Configurable {
     private JCheckBox smartLinebreakAfterCurlyCheckBox;
     private JTextArea ignoreFilesExtensions;
     private JCheckBox autoUpdatePharCheckbox;
+    private JLabel customFmtPharPathlabe;
+    private JTextField customFmtPharPath;
 
 
     @Nls
@@ -86,6 +88,7 @@ public class Configuration implements Configurable {
         modified = modified || settings.isAutoImport() != autoImportCheckBox.isSelected();
         modified = modified || settings.getIgnoreFilesExtensions().equals(ignoreFilesExtensions.getText());
         modified = modified || settings.isAutoUpdatePhar() != autoUpdatePharCheckbox.isSelected();
+        modified = modified || settings.getCustomPharPath().equals(customFmtPharPath.getText());
         return modified;
     }
 
@@ -120,13 +123,16 @@ public class Configuration implements Configurable {
             settersGettersItemValue = "";
         }
         settings.setSettersGettersType(settersGettersItemValue);
+        String oracleFileNameText = "";
         if (autoImportCheckBox.isSelected() && !oracleFileName.getText().isEmpty()) {
-            settings.setOracleFileName(oracleFileName.getText());
+            oracleFileNameText = oracleFileName.getText();
         }
+        settings.setOracleFileName(oracleFileNameText);
         settings.setAutoImport(autoImportCheckBox.isSelected());
 
         settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
         settings.setAutoUpdatePhar(autoUpdatePharCheckbox.isSelected());
+        settings.setCustomPharPath(customFmtPharPath.getText());
     }
 
     @Override
@@ -144,7 +150,11 @@ public class Configuration implements Configurable {
         extensions.setText(StringUtil.join(settings.getExtensions(), ","));
         formatOnSave.setSelected(settings.isFormatOnSave());
         spaceIndentationCheckBox.setSelected(settings.isSpaceIndentation());
-        spaceIndentationSize.setText(Integer.toString(settings.getSpaceIndentationSize()));
+        String spaceIndentationSizeText = "";
+        if (settings.isSpaceIndentation()) {
+            spaceIndentationSizeText = Integer.toString(settings.getSpaceIndentationSize());
+        }
+        spaceIndentationSize.setText(spaceIndentationSizeText);
         autoAlignCheckBox.setSelected(settings.isAutoAlign());
         visibilityOrderCheckBox.setSelected(settings.isVisibilityOrder());
         smartLinebreakAfterCurlyCheckBox.setSelected(settings.isSmartLinebreakAfterCurly());
@@ -156,6 +166,7 @@ public class Configuration implements Configurable {
         spaceIndentationSize.setEnabled(spaceIndentationCheckBox.isSelected());
         optionsFile.setEnabled(activate.isSelected());
         oracleFileName.setEnabled(autoImportCheckBox.isSelected());
+        customFmtPharPath.setText(settings.getCustomPharPath());
     }
 
     @Override
@@ -182,6 +193,7 @@ public class Configuration implements Configurable {
         autoImportCheckBox = null;
         ignoreFilesExtensions = null;
         autoUpdatePharCheckbox = null;
+        customFmtPharPath = null;
     }
 
 
@@ -212,6 +224,4 @@ public class Configuration implements Configurable {
             }
         };
     }
-
-
 }

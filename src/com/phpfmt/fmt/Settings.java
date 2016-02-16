@@ -29,8 +29,17 @@ public class Settings implements PersistentStateComponent<Settings> {
     }
 
     private String pharPath = "";
+    private String customPharPath = "";
     private String version = "";
     private String extensions = "php";
+
+    public String getCustomPharPath() {
+        return customPharPath;
+    }
+
+    public void setCustomPharPath(String customPharPath) {
+        this.customPharPath = customPharPath;
+    }
 
     public boolean isFormatOnSave() {
         return formatOnSave;
