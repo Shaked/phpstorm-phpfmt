@@ -267,14 +267,14 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.phpExecutable = phpExecutable;
     }
 
+    @Override
     public String toString() {
-        return "State" + this.getState() + "\n" +
-                "Extensions" + this.getExtensions() + "\n" +
+        return "Extensions" + this.getExtensions().toString() + "\n" +
                 "IgnoreFilesExtensions" + this.getIgnoreFilesExtensions() + "\n" +
                 "OracleFileName" + this.getOracleFileName() + "\n" +
                 "PharPath" + this.getPharPath() + "\n" +
                 "Version" + this.getVersion() + "\n" +
-                "SpaceIndentationSize" + this.getSpaceIndentationSize() + "\n" +
+                "SpaceIndentationSize" + String.valueOf(this.getSpaceIndentationSize()) + "\n" +
                 "Passes" + this.getPasses() + "\n" +
                 "Exclude" + this.getExclude() + "\n" +
                 "SettersGettersType" + this.getSettersGettersType() + "\n" +
