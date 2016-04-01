@@ -47,12 +47,13 @@ public class Formatter {
         String[] p = ignoreFileExtensions.split(",");
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
         for (String item : p) {
-            if (extension.equalsIgnoreCase(item)) {
+            LOGGER.debug("checking item: " + item + " with extension: " + extension);
+            if (fileName.lastIndexOf(item) > -1) {
                 LOGGER.debug("blockedFileOrExtension::returns true::" + item);
                 return true;
             }
         }
-        LOGGER.debug("blockedFileOrExtension::returns false");
+        LOGGER.debug("blockedFileOrExtension::returns false, filename: " + fileName + ", extensions: " + extension);
         return false;
     }
 
