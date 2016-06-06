@@ -85,11 +85,11 @@ public class Component implements ApplicationComponent {
 
         String downloadUrl = "https://github.com/phpfmt/releases/raw/master/releases/" + engineChannel + "/" + engineVersion + "/fmt.phar";
         FileOutputStream fos = null;
+        String output = path() + "fmt.phar";
         try {
             toEventLog(settings.isDebug(), "phpfmt downloading new release", "");
             URL website = new URL(downloadUrl);
             ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-            String output = path() + "/fmt.phar";
             fos = new FileOutputStream(output);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             fos.close();
@@ -104,7 +104,7 @@ public class Component implements ApplicationComponent {
             }
             return;
         }
-        settings.setPharPath(path());
+        settings.setPharPath(output);
         toEventLog(settings.isDebug(), "phpfmt was updated successfully.", "");
     }
 
