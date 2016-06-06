@@ -40,7 +40,6 @@ public class Configuration implements Configurable {
     private JComboBox settersAndGetters;
     private JCheckBox smartLinebreakAfterCurlyCheckBox;
     private JTextArea ignoreFilesExtensions;
-    private JCheckBox autoUpdatePharCheckbox;
     private JLabel customFmtPharPathlabe;
     private JTextField customFmtPharPath;
     private JComboBox engineChannel;
@@ -89,7 +88,6 @@ public class Configuration implements Configurable {
         modified = modified || settings.getOracleFileName().equals(oracleFileName.getText());
         modified = modified || settings.isAutoImport() != autoImportCheckBox.isSelected();
         modified = modified || settings.getIgnoreFilesExtensions().equals(ignoreFilesExtensions.getText());
-        modified = modified || settings.isAutoUpdatePhar() != autoUpdatePharCheckbox.isSelected();
         modified = modified || settings.getCustomPharPath().equals(customFmtPharPath.getText());
         modified = modified || settings.getEngineChannel().equals(engineChannel.getSelectedItem().toString());
         modified = modified || settings.getEngineVersion().equals(engineVersion.getText());
@@ -135,7 +133,6 @@ public class Configuration implements Configurable {
         settings.setAutoImport(autoImportCheckBox.isSelected());
 
         settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
-        settings.setAutoUpdatePhar(autoUpdatePharCheckbox.isSelected());
         settings.setCustomPharPath(customFmtPharPath.getText());
         settings.setEngineChannel(engineChannel.getSelectedItem().toString());
         settings.setEngineVersion(engineVersion.getText());
@@ -168,7 +165,6 @@ public class Configuration implements Configurable {
         oracleFileName.setText(settings.getOracleFileName());
         autoImportCheckBox.setSelected(settings.isAutoImport());
         ignoreFilesExtensions.setText(settings.getIgnoreFilesExtensions());
-        autoUpdatePharCheckbox.setSelected(settings.isAutoUpdatePhar());
         spaceIndentationSize.setEnabled(spaceIndentationCheckBox.isSelected());
         optionsFile.setEnabled(activate.isSelected());
         oracleFileName.setEnabled(autoImportCheckBox.isSelected());
@@ -200,7 +196,6 @@ public class Configuration implements Configurable {
         oracleFileName = null;
         autoImportCheckBox = null;
         ignoreFilesExtensions = null;
-        autoUpdatePharCheckbox = null;
         customFmtPharPath = null;
         engineChannel = null;
         engineVersion = null;

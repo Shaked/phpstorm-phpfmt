@@ -52,7 +52,6 @@ public class Settings implements PersistentStateComponent<Settings> {
     private boolean smartLinebreakAfterCurly = false;
     private boolean yoda = false;
     private boolean autoImport = false;
-    private boolean autoUpdatePhar = false;
     private int indentWithSpaceSize = 0;
 
     public String getCustomPharPath() {
@@ -83,14 +82,6 @@ public class Settings implements PersistentStateComponent<Settings> {
 
     public String getIgnoreFilesExtensions() {
         return ignoreFilesExtensions;
-    }
-
-    public boolean isAutoUpdatePhar() {
-        return autoUpdatePhar;
-    }
-
-    public void setAutoUpdatePhar(boolean autoUpdatePhar) {
-        this.autoUpdatePhar = autoUpdatePhar;
     }
 
     public void setIgnoreFilesExtensions(String ignoreFilesExtensions) {
