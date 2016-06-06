@@ -30,8 +30,30 @@ public class Settings implements PersistentStateComponent<Settings> {
 
     private String pharPath = "";
     private String customPharPath = "";
-    private String version = "";
     private String extensions = "php";
+    private String optionsFile = "";
+    private String phpExecutable = "/usr/local/bin/php";
+    private String settersGettersType = "";
+    private String oracleFileName = "";
+    private String ignoreFilesExtensions = "";
+    private String passes = "";
+    private String exclude = "";
+    private String engineChannel = "lts";
+    private String engineVersion = "";
+    private boolean formatOnSave = false;
+    private boolean activated = true;
+    private boolean debug = false;
+    private boolean psr1 = false;
+    private boolean psr1Naming = false;
+    private boolean psr2 = false;
+    private boolean indentWithSpace = false;
+    private boolean enableAutoAlign = false;
+    private boolean visibilityOrder = false;
+    private boolean smartLinebreakAfterCurly = false;
+    private boolean yoda = false;
+    private boolean autoImport = false;
+    private boolean autoUpdatePhar = false;
+    private int indentWithSpaceSize = 0;
 
     public String getCustomPharPath() {
         return customPharPath;
@@ -49,7 +71,6 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.formatOnSave = formatOnSave;
     }
 
-    private boolean formatOnSave = false;
 
     public ArrayList<String> getExtensions() {
         return new ArrayList<String>(Arrays.asList(extensions.split(",")));
@@ -59,26 +80,6 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.extensions = extensions.replace(".", "");
     }
 
-    private String optionsFile = "";
-
-    private String phpExecutable = "/usr/local/bin/php";
-
-    private boolean activated = true;
-    private boolean debug = false;
-    private boolean psr1 = false;
-    private boolean psr1Naming = false;
-    private boolean psr2 = false;
-    private boolean indentWithSpace = false;
-    private int indentWithSpaceSize = 0;
-    private boolean enableAutoAlign = false;
-    private boolean visibilityOrder = false;
-    private boolean smartLinebreakAfterCurly = false;
-    private boolean yoda = false;
-    private String settersGettersType = "";
-    private boolean autoImport = false;
-    private String oracleFileName = "";
-    private String ignoreFilesExtensions = "";
-    private boolean autoUpdatePhar = false;
 
     public String getIgnoreFilesExtensions() {
         return ignoreFilesExtensions;
@@ -104,28 +105,13 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.oracleFileName = oracleFileName;
     }
 
-    public boolean isInstalled(String version) {
-        return pharPath != "" && this.version == version;
-    }
-
     public String getPharPath() {
         return pharPath;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public void setPharPath(String pharPath) {
         this.pharPath = pharPath;
     }
-
-    private String passes = "";
-    private String exclude = "";
 
     public boolean isActivated() {
         return activated;
@@ -267,13 +253,28 @@ public class Settings implements PersistentStateComponent<Settings> {
         this.phpExecutable = phpExecutable;
     }
 
+    public String getEngineChannel() {
+        return engineChannel;
+    }
+
+    public void setEngineChannel(String engineChannel) {
+        this.engineChannel = engineChannel;
+    }
+
+    public String getEngineVersion() {
+        return engineVersion;
+    }
+
+    public void setEngineVersion(String engineVersion) {
+        this.engineVersion = engineVersion;
+    }
+
     @Override
     public String toString() {
         return "Extensions" + this.getExtensions().toString() + "\n" +
                 "IgnoreFilesExtensions" + this.getIgnoreFilesExtensions() + "\n" +
                 "OracleFileName" + this.getOracleFileName() + "\n" +
                 "PharPath" + this.getPharPath() + "\n" +
-                "Version" + this.getVersion() + "\n" +
                 "SpaceIndentationSize" + String.valueOf(this.getSpaceIndentationSize()) + "\n" +
                 "Passes" + this.getPasses() + "\n" +
                 "Exclude" + this.getExclude() + "\n" +

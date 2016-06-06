@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>phpfmt</id>
     <name>PhpStorm phpfmt</name>
-    <version>1.0.13</version>
+    <version>1.1.0</version>
     <vendor email="klein.shaked@gmail.com" url="http://www.github.com/phpfmt/phpstorm-phpfmt">phpstorm-phpfmt</vendor>
 
     <description><![CDATA[
@@ -9,8 +9,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        First release supports minor formatting options.
-        Please see preferences for more information.
+        The plugin now follows phpfmt's new release process. This means that phpfmt will be updated automatically unless stated otherwise.
+        You are welcome to check the new settings in the settings panel.
     ]]>
     </change-notes>
 
@@ -31,7 +31,7 @@
 
     <actions>
         <!--<action text="phpfmt" overrides="true" id="SaveAll" class="com.phpfmt.fmt.FormatterAction"-->
-                <!--icon="AllIcons.Actions.Menu_saveall"/>-->
+        <!--icon="AllIcons.Actions.Menu_saveall"/>-->
         <action id="format_code" class="com.phpfmt.fmt.FormatterAction"
                 text="Format Code"
                 description="Formats the code using the phpfmt library">

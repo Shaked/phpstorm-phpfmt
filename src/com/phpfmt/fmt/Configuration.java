@@ -43,6 +43,8 @@ public class Configuration implements Configurable {
     private JCheckBox autoUpdatePharCheckbox;
     private JLabel customFmtPharPathlabe;
     private JTextField customFmtPharPath;
+    private JComboBox engineChannel;
+    private JTextField engineVersion;
 
 
     @Nls
@@ -89,6 +91,8 @@ public class Configuration implements Configurable {
         modified = modified || settings.getIgnoreFilesExtensions().equals(ignoreFilesExtensions.getText());
         modified = modified || settings.isAutoUpdatePhar() != autoUpdatePharCheckbox.isSelected();
         modified = modified || settings.getCustomPharPath().equals(customFmtPharPath.getText());
+        modified = modified || settings.getEngineChannel().equals(engineChannel.getSelectedItem().toString());
+        modified = modified || settings.getEngineVersion().equals(engineVersion.getText());
         return modified;
     }
 
@@ -133,6 +137,8 @@ public class Configuration implements Configurable {
         settings.setIgnoreFilesExtensions(ignoreFilesExtensions.getText());
         settings.setAutoUpdatePhar(autoUpdatePharCheckbox.isSelected());
         settings.setCustomPharPath(customFmtPharPath.getText());
+        settings.setEngineChannel(engineChannel.getSelectedItem().toString());
+        settings.setEngineVersion(engineVersion.getText());
     }
 
     @Override
@@ -167,6 +173,8 @@ public class Configuration implements Configurable {
         optionsFile.setEnabled(activate.isSelected());
         oracleFileName.setEnabled(autoImportCheckBox.isSelected());
         customFmtPharPath.setText(settings.getCustomPharPath());
+        engineChannel.setSelectedItem(settings.getEngineChannel());
+        engineVersion.setText(settings.getEngineVersion());
     }
 
     @Override
@@ -194,6 +202,8 @@ public class Configuration implements Configurable {
         ignoreFilesExtensions = null;
         autoUpdatePharCheckbox = null;
         customFmtPharPath = null;
+        engineChannel = null;
+        engineVersion = null;
     }
 
 
@@ -211,6 +221,7 @@ public class Configuration implements Configurable {
         visibilityOrderCheckBox.addActionListener(getActionListener());
         smartLinebreakAfterCurlyCheckBox.addActionListener(getActionListener());
         autoImportCheckBox.addActionListener(getActionListener());
+        engineChannel.addActionListener(getActionListener());
     }
 
     @NotNull
@@ -221,6 +232,7 @@ public class Configuration implements Configurable {
                 optionsFile.setEnabled(activate.isSelected());
                 spaceIndentationSize.setEnabled(spaceIndentationCheckBox.isSelected());
                 oracleFileName.setEnabled(autoImportCheckBox.isSelected());
+                engineVersion.setText("");
             }
         };
     }

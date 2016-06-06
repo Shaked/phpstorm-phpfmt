@@ -1,5 +1,8 @@
 package com.phpfmt.fmt;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.intellij.AppTopics;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.notification.*;
@@ -10,88 +13,109 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import org.apache.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Component implements ApplicationComponent {
+    public static final Logger LOGGER = Logger.getInstance(FormatterAction.class);
 
+    static {
+        LOGGER.setLevel(Level.DEBUG);
+    }
     private static final String COMPONENT_NAME = "Save Actions";
     private final Settings settings = ServiceManager.getService(Settings.class);
 
     public void initComponent() {
-        install();
-        toEventLog(settings.isDebug(), "initComponent", "settings.isAutoUpdatePhar? " + settings.isAutoUpdatePhar());
-        if (settings.isAutoUpdatePhar()) {
-            updatePhar();
-        }
+        LOGGER.debug("phpfmt welcome!", String.format("Debug mode is: %s", settings.isDebug()? "On": "Off"));
+        toEventLog(settings.isDebug(), "phpfmt updating phpfmt...", String.format("engine: %s, version: %s.", settings.getEngineChannel(), settings.getEngineVersion()));
+        selfUpdate();
         final MessageBus bus = ApplicationManager.getApplication().getMessageBus();
         final MessageBusConnection connection = bus.connect();
         connection.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileListener());
     }
 
-    private void updatePhar() {
-        List<String> list = new ArrayList<>();
-        list.add(settings.getPhpExecutable());
-        if (!settings.isDebug()) {
-            list.add("-ddisplay_errors=stderr");
-        }
-        String pharPath = settings.getPharPath();
-        if (!settings.getCustomPharPath().isEmpty()) {
-            pharPath = settings.getCustomPharPath();
-        }
-        list.add(pharPath);
-        list.add("--selfupdate");
-        toEventLog(settings.isDebug(), "updatePhar", "LIST: " + list.toString());
-        ProcessBuilder pb = new ProcessBuilder(list);
-        Process process;
-        try {
-            process = pb.start();
-            InputStream stdout = process.getInputStream();
-            InputStream stderr = process.getErrorStream();
-
-
-            ByteArrayOutputStream errous = new ByteArrayOutputStream();
-            StreamGobbler errorGobbler = new StreamGobbler(stderr, "ERROR", errous, Charset.defaultCharset());
-            ByteArrayOutputStream ous = new ByteArrayOutputStream();
-            // any output?
-            StreamGobbler outputGobbler = new StreamGobbler(stdout, "OUTPUT", ous, Charset.defaultCharset());
-
-            errorGobbler.start();
-            outputGobbler.start();
-
-            int exitStatus = -1;
+    private void selfUpdate() {
+        String engineVersion = settings.getEngineVersion();
+        String engineChannel = settings.getEngineChannel();
+        if (engineVersion.isEmpty()) {
+            String releasesUrl = "https://raw.githubusercontent.com/phpfmt/releases/master/releases.json";
+            toEventLog(settings.isDebug(), "phpfmt fetching phpfmt version", String.format("using releases url: %s, with engine: %s.", releasesUrl, settings.getEngineChannel()));
+            InputStream responseInputStream = null;
             try {
-                exitStatus = process.waitFor();
-            } catch (InterruptedException e) {
-                toEventLog(settings.isDebug(), "updatePhar", "waiting for process failed: " + e.getMessage());
-            }
-            String retOutput = ous.toString();
+                URL url = new URL(releasesUrl);
+                HttpURLConnection request  = (HttpURLConnection) url.openConnection();
+                request.connect();
+                if (request.getResponseCode() > 400) {
+                    responseInputStream = request.getErrorStream();
+                } else {
+                    responseInputStream = request.getInputStream();
+                }
 
-
-            toEventLog(settings.isDebug(), "updatePhar", "retOutput: " + retOutput);
-            if (0 != exitStatus) {
-                String err = errous.toString();
-                toEventLog(settings.isDebug(), "updatePhar", "stdErr: " + err);
+                // Convert to a JSON object to print data
+                JsonParser jp = new JsonParser(); //from gson
+                JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+                JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an o
+                engineVersion = rootobj.get(engineChannel).getAsString();
+                settings.setEngineVersion(engineVersion);
+                toEventLog(settings.isDebug(), "phpfmt found version", String.format("engine: %s, version: %s.", settings.getEngineChannel(), settings.getEngineVersion()));
+            } catch (Exception e) {
+                toEventLog(settings.isDebug(), "phpfmt cannot get releases data", e.getMessage());
+            } finally {
+                if (responseInputStream != null) {
+                    try {
+                        responseInputStream.close();
+                    } catch (IOException e) {
+                    }
+                }
             }
-        } catch (IOException e) {
-            notify("Update fmt.phar", "Could not automatically update fmt.phar. For more details, use `debug mode`");
-            toEventLog(settings.isDebug(), "Update fmt.phar", "error start process: " + e.getMessage() + ": list: " + list.toString() + ": settings: " + settings.toString());
         }
+
+        if(engineVersion.isEmpty()) {
+            return;
+        }
+
+        String downloadUrl = "https://github.com/phpfmt/releases/raw/master/releases/" + engineChannel + "/" + engineVersion + "/fmt.phar";
+        FileOutputStream fos = null;
+        try {
+            toEventLog(settings.isDebug(), "phpfmt downloading new release", "");
+            URL website = new URL(downloadUrl);
+            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+            String output = path() + "/fmt.phar";
+            fos = new FileOutputStream(output);
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            fos.close();
+        } catch (Exception e) {
+            toEventLog(settings.isDebug(), "phpfmt cannot download fmt.phar", e.getMessage());
+            if (fos != null){
+                try {
+                    fos.close();
+                } catch(IOException fosEx) {
+
+                }
+            }
+            return;
+        }
+        settings.setPharPath(path());
+        toEventLog(settings.isDebug(), "phpfmt was updated successfully.", "");
     }
 
     private String path() {
-        URL url1 = Component.class.getResource("/bin/fmt.phar");
+        URL url1 = Component.class.getResource("/META-INF/plugin.xml");
         String ur = url1.toString();
         ur = ur.substring(9);
         String truepath[] = ur.split("phpstorm-phpfmt.jar!");
         truepath[0] = truepath[0].replaceAll("%20", " ");
         String x = truepath[0];
-        toEventLog(settings.isDebug(), "path    ", "Path is: " + x + " UR is: " + ur);
+        toEventLog(settings.isDebug(), "phpfmt phar's path extracted", String.format("path is: %s, ur: %s", x, ur));
         return x;
     }
 
@@ -99,84 +123,19 @@ public class Component implements ApplicationComponent {
 
     public static void notify(String title, String msg) {
         Notification notification = ng.createNotification("[" + title + "]" + msg, NotificationType.INFORMATION);
+        EventLog.formatForLog(notification,"");
         Notifications.Bus.notify(notification);
         notification.hideBalloon();
+    }
+    public static void toEventLog(boolean isDebug, String title) {
+        toEventLog(isDebug, title, "");
     }
 
     public static void toEventLog(boolean isDebug, String title, String msg) {
         if (isDebug) {
-            FormatterAction.LOGGER.debug(title + ": " + msg);
+            LOGGER.debug(title + ": " + msg);
             notify(title, msg);
         }
-    }
-
-    private void install() {
-        String version = PluginManager.getPlugin(PluginId.getId("phpfmt")).getVersion();
-        toEventLog(settings.isDebug(), "install", this.getClass().toString() + ": version: " + version + ": isInstalled:" + settings.isInstalled(version) + " getPath: " + settings.getPharPath());
-        if (!settings.isInstalled(version)) {
-            String pharFile = path() + "/fmt.phar";
-            File phar = new File(pharFile);
-            if (phar != null) {
-                phar.delete();
-            }
-            try {
-                InputStream ddlStream = Component.class.getClassLoader().getResourceAsStream("/bin/fmt.phar");
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(pharFile);
-                    byte[] buf = new byte[2048];
-                    int r = ddlStream.read(buf);
-                    while (r != -1) {
-                        fos.write(buf, 0, r);
-                        r = ddlStream.read(buf);
-                    }
-
-                } finally {
-                    if (fos != null) {
-                        fos.close();
-                    }
-                }
-                String pharPath = new File(pharFile).getAbsolutePath();
-
-                toEventLog(settings.isDebug(), "install", this.getClass().toString() + ": pharPath:" + pharPath);
-                settings.setPharPath(pharPath);
-                settings.setVersion(version);
-            } catch (Exception e) {
-                toEventLog(settings.isDebug(), "install-exception", this.getClass().toString() + ": exception export resource" + e.getMessage());
-            }
-        }
-    }
-
-    public String ExportResource(String resourceName, String saveName) throws Exception {
-        InputStream stream = null;
-        OutputStream resStreamOut = null;
-        String jarFolder;
-        String outName;
-        try {
-            stream = Component.class.getResourceAsStream(resourceName);//note that each / is a directory down in the "jar tree" been the jar the root of the tree
-            if (stream == null) {
-                throw new Exception("Cannot get resource \"" + resourceName + "\" from Jar file.");
-            }
-
-            int readBytes;
-            byte[] buffer = new byte[4096];
-            String jarPath = Component.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            jarFolder = new File(jarPath).getParentFile().getPath().replace('\\', '/');
-            outName = jarFolder + saveName;
-            resStreamOut = new FileOutputStream(outName);
-            FormatterAction.LOGGER.debug(Component.class.toString() + " jarPath: " + jarPath + " :: jarFolder: " + jarFolder + " outName: " + outName);
-            while ((readBytes = stream.read(buffer)) > 0) {
-                resStreamOut.write(buffer, 0, readBytes);
-            }
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            stream.close();
-            resStreamOut.close();
-        }
-
-        FormatterAction.LOGGER.debug(Component.class.toString() + " outName: " + outName);
-        return outName;
     }
 
     public void disposeComponent() {
